@@ -1,0 +1,48 @@
+name: Test
+# on: push
+on: [repository_dispatch, workflow_dispatch]
+jobs:
+  lint:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        python-version:
+          - '3.11'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          apt install -y base-files dash libc-bin libc6:amd64 libncursesw6:amd64 libpython3.11-minimal:amd64 libpython3.11-stdlib:amd64 locales ncurses-base openssl python-is-python3 python3-attr python3-bcrypt python3-click python3-cryptography python3-idna python3-jinja2 python3-markupsafe python3-packaging python3-zope.interface python3.10-minimal python3.11-minimal tzdata
+      - name: Execute Tests
+        run: |
+          uv pip install -r requirements-tests.txt
+          uv pip install --upgrade "pydantic>=2.0.2,<3.0.0"
+          bash scripts/lint.sh
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        python-version:
+          - '3.11'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          apt install -y base-files cloud-init dash libc-bin libc6:amd64 libcrypt1:amd64 libpcre2-8-0:amd64 libpython3.11-minimal:amd64 libpython3.11-stdlib:amd64 libselinux1:amd64 locales media-types ncurses-base openssl python-is-python3 python3-automat python3-babel python3-chardet python3-cryptography python3-distro python3-incremental python3-jinja2 python3-jsonschema python3-keyring python3-pip python3-pygments python3-serial python3-setuptools python3-twisted python3-wheel python3-zope.interface python3.10-minimal python3.11-minimal ssh-import-id tzdata ubuntu-pro-client
+      - name: Execute Tests
+        run: |
+          uv pip install -r requirements-tests.txt
+          uv pip install --upgrade "pydantic>=2.0.2,<3.0.0"
+          uv pip install "anyio[trio]<4.0.0"
+          mkdir coverage
+          bash scripts/test.sh
