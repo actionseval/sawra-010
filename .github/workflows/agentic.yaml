@@ -1,0 +1,38 @@
+name: agentic
+
+on: workflow_dispatch
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      UV_SYSTEM_PYTHON: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+      - name: Run lint commands
+        run: |
+          uv pip install -r requirements-tests.txt
+          uv pip install --upgrade "pydantic>=2.0.2,<3.0.0"
+          bash scripts/lint.sh
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      UV_SYSTEM_PYTHON: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+      - name: Run test commands
+        run: |
+          uv pip install -r requirements-tests.txt
+          uv pip install --upgrade "pydantic>=2.0.2,<3.0.0"
+          uv pip install "anyio[trio]<4.0.0"
+          mkdir coverage
+          bash scripts/test.sh
